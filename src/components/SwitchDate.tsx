@@ -28,18 +28,25 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 interface Prop {
-    currentDateRange: string
+    currentDateRange: string;
+    onClick: (action: "forward" | "back") => void;
 }
 
-const SwitchDate: FunctionComponent<Prop> = ({ currentDateRange }) => {
+const SwitchDate: FunctionComponent<Prop> = ({ currentDateRange, onClick }) => {
     const classes = useStyles();
     return (
         <Box className={classes.box}>
-            <IconButton className={clsx(classes.iconButtonOutlined, classes.gap)}>
+            <IconButton
+                className={clsx(classes.iconButtonOutlined, classes.gap)}
+                onClick={() => { onClick("back") }}
+            >
                 <ArrowBackIosRoundedIcon />
             </IconButton>
             <Typography variant="subtitle1" className={clsx(classes.textDate, classes.gap)}>{currentDateRange}</Typography>
-            <IconButton className={classes.iconButtonOutlined}>
+            <IconButton
+                className={classes.iconButtonOutlined}
+                onClick={() => { onClick("forward") }}
+            >
                 <ArrowForwardIosRoundedIcon />
             </IconButton>
         </Box>

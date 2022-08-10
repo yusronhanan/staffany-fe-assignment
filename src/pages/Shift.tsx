@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { getErrorMessage } from "../helper/error/index";
-import { deleteShiftById, getShifts } from "../helper/api/shift";
+import { deleteShiftById, getShiftsByYearWeek } from "../helper/api/shift";
 import DataTable from "react-data-table-component";
 import { useHistory } from "react-router-dom";
 import ConfirmDialog from "../components/ConfirmDialog";
@@ -14,6 +14,9 @@ import AddIcon from "@material-ui/icons/Add";
 import Button from "../components/Button";
 import LastPublishedText from "../components/LastPublishedText";
 import SwitchDate from "../components/SwitchDate";
+import { convertDateRangeToText, convertToYearWeek, getTodayDateRangeInWeek } from "../helper/function";
+import { getShiftPublishedByYearWeek } from "../helper/api/shiftPublished";
+import { EStatusShiftPublished, IShiftPublished } from "../helper/interface";
 const useStyles = makeStyles((theme) => ({
   root: {
     minWidth: 275,
@@ -72,6 +75,14 @@ const Shift = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
+  const { startDateOfCurrentWeek, endDateOfCurrentWeek } = getTodayDateRangeInWeek();
+  const [startWeekDate, setStartWeekDate] = useState(startDateOfCurrentWeek);
+  const [endWeekDate, setEndWeekDate] = useState(endDateOfCurrentWeek);
+  const [weekDateRangeText, setWeekDateRangeText] = useState(convertDateRangeToText(startWeekDate, endWeekDate))
+  const [yearWeekDateRange, setYearWeekDateRange] = useState(convertToYearWeek(startWeekDate))
+  const [shiftPublished, setShiftPublished] = useState<IShiftPublished | null>(null)
+  const [isSelectedWeekPublished, setIsSelectedWeekPublished] = useState<boolean>(false)
+
   const onDeleteClick = (id: string) => {
     setSelectedId(id);
     setShowDeleteConfirm(true);
@@ -82,23 +93,51 @@ const Shift = () => {
     setShowDeleteConfirm(false);
   };
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        setIsLoading(true);
-        setErrMsg("");
-        const { results } = await getShifts();
-        setRows(results);
-      } catch (error) {
-        const message = getErrorMessage(error);
-        setErrMsg(message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const switchDateRange = (action: "forward" | "back") => {
+    let addedRange = action === "forward" ? 7 : -7;
+    let newStartDate = startWeekDate;
+    let newEndDate = endWeekDate;
+    newStartDate.setDate(newStartDate.getDate() + addedRange);
+    newEndDate.setDate(newEndDate.getDate() + addedRange);
 
+    setStartWeekDate(newStartDate)
+    setEndWeekDate(newEndDate)
+    setWeekDateRangeText(convertDateRangeToText(newStartDate, newEndDate))
+    setYearWeekDateRange(convertToYearWeek(newStartDate))
     getData();
-  }, []);
+  }
+  const getData = async () => {
+    try {
+      setIsLoading(true);
+      setErrMsg("");
+      const response = await getShiftsByYearWeek(yearWeekDateRange);
+      setRows(response.results);
+
+      const responseShiftPublished = await getShiftPublishedByYearWeek(yearWeekDateRange);
+      if (responseShiftPublished.results != null) {
+        const shiftPublished: IShiftPublished = responseShiftPublished.results as IShiftPublished;
+        console.log(`shiftPublished ${shiftPublished.createdAt}`)
+        setShiftPublished(shiftPublished)
+
+        if (shiftPublished.status === EStatusShiftPublished.PUBLISHED.toString()) {
+          setIsSelectedWeekPublished(true)
+        }
+      } else {
+        setShiftPublished(null)
+        setIsSelectedWeekPublished(false)
+      }
+
+    } catch (error) {
+      const message = getErrorMessage(error);
+      setErrMsg(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    getData();
+  }, [yearWeekDateRange]);
+
 
   const columns = [
     {
@@ -166,20 +205,29 @@ const Shift = () => {
               <></>
             )}
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <SwitchDate currentDateRange={`Jan 10 - Jan 16`} />
+              <SwitchDate
+                currentDateRange={weekDateRangeText}
+                onClick={switchDateRange}
+              />
               <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: "center" }}>
+                {isSelectedWeekPublished ? (
+                  <LastPublishedText
+                    lastPublishDate={shiftPublished && shiftPublished.status === EStatusShiftPublished.PUBLISHED.toString() ? shiftPublished.createdAt : ""}
+                  />
+                ) : (
+                  <></>
+                )}
 
-                <LastPublishedText
-                  lastPublishDate={`11 Jan 2022, 11:30 AM`}
-                />
 
                 <Button variant="outlined"
                   to={`/shift/add`}
+                  disabled={isSelectedWeekPublished}
                 >
                   ADD SHIFT
                 </Button>
                 <Button
                   variant="contained"
+                  disabled={isSelectedWeekPublished || rows.length === 0}
                 >
                   PUBLISH
                 </Button>

@@ -20,14 +20,14 @@ const useStyles = makeStyles((theme) => ({
 }));
 interface Prop {
     children: React.ReactNode;
-    isDisable?: boolean;
+    disabled?: boolean;
     to?: string;
     onClick?: () => void;
     variant: "text" | "outlined" | "contained" | undefined;
     className?: string;
 }
 
-const Button: FunctionComponent<Prop> = ({ children, isDisable = false, to, onClick, variant, className }) => {
+const Button: FunctionComponent<Prop> = ({ children, disabled = false, to, onClick, variant, className }) => {
     const classes = useStyles();
     let button;
     if (to != null) {
@@ -36,7 +36,7 @@ const Button: FunctionComponent<Prop> = ({ children, isDisable = false, to, onCl
             component={RouterLink}
             className={className ?? clsx(classes.btn, variant === "outlined" ? classes.outlineBtn : classes.containedBtn)}
             to={to}
-            disabled={isDisable}
+            disabled={disabled}
         >
             {children}
         </ButtonMUI>;
@@ -45,7 +45,7 @@ const Button: FunctionComponent<Prop> = ({ children, isDisable = false, to, onCl
             variant={variant}
             onClick={() => { onClick() }}
             className={className ?? clsx(classes.btn, variant === "outlined" ? classes.outlineBtn : classes.containedBtn)}
-            disabled={isDisable}
+            disabled={disabled}
         >
             {children}
         </ButtonMUI>;
@@ -53,7 +53,7 @@ const Button: FunctionComponent<Prop> = ({ children, isDisable = false, to, onCl
         button = <ButtonMUI
             variant={variant}
             className={className ?? clsx(classes.btn, variant === "outlined" ? classes.outlineBtn : classes.containedBtn)}
-            disabled={isDisable}
+            disabled={disabled}
         >
             {children}
         </ButtonMUI>;

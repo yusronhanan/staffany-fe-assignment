@@ -6,6 +6,11 @@ export const getShifts = async () => {
   return data;
 };
 
+export const getShiftsByYearWeek = async (yearWeek: string) => {
+  const api = getAxiosInstance()
+  const { data } = await api.get(`/shifts?yearWeek=${yearWeek}`);
+  return data;
+};
 export const getShiftById = async (id: string) => {
   const api = getAxiosInstance()
   const { data } = await api.get(`/shifts/${id}`);
