@@ -33,16 +33,18 @@ const useStyles = makeStyles((theme) => ({
 
 interface ActionButtonProps {
   id: string;
+  disabled: boolean;
   onDelete: () => void;
 }
 const ActionButton: FunctionComponent<ActionButtonProps> = ({
   id,
+  disabled,
   onDelete,
 }) => {
   return (
     <div>
       <IconButton
-        disabled={false}
+        disabled={disabled}
         size="small"
         aria-label="delete"
         component={RouterLink}
@@ -52,7 +54,7 @@ const ActionButton: FunctionComponent<ActionButtonProps> = ({
         <EditIcon fontSize="small" />
       </IconButton>
       <IconButton
-        disabled={false}
+        disabled={disabled}
         size="small"
         aria-label="delete"
         onClick={() => onDelete()
@@ -163,7 +165,7 @@ const Shift = () => {
     {
       name: "Actions",
       cell: (row: any) => (
-        <ActionButton id={row.id} onDelete={() => onDeleteClick(row.id)} />
+        <ActionButton disabled={isSelectedWeekPublished} id={row.id} onDelete={() => onDeleteClick(row.id)} />
       ),
     },
   ];
@@ -175,6 +177,9 @@ const Shift = () => {
 
       if (selectedId === null) {
         throw new Error("ID is null");
+      }
+      if (isSelectedWeekPublished) {
+        throw new Error("Shift is already published");
       }
 
       console.log(deleteDataById);
@@ -220,7 +225,7 @@ const Shift = () => {
 
 
                 <Button variant="outlined"
-                  to={`/shift/add`}
+                  to={`/shift/add/${startWeekDate}`}
                   disabled={isSelectedWeekPublished}
                 >
                   ADD SHIFT
@@ -244,14 +249,16 @@ const Shift = () => {
           </CardContent>
         </Card>
       </Grid>
-      <Fab
+      {!isSelectedWeekPublished ? (<Fab
         size="medium"
         aria-label="add"
         className={classes.fab}
-        onClick={() => history.push("/shift/add")}
+        onClick={() => history.push(`/shift/add/${startWeekDate}`)}
       >
         <AddIcon />
-      </Fab>
+      </Fab>) : (
+        <></>
+      )}
       <ConfirmDialog
         title="Delete Confirmation"
         description={`Do you want to delete this data ?`}

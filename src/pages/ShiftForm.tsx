@@ -51,6 +51,7 @@ const useStyles = makeStyles((theme) => ({
 
 interface PathParams {
   id?: string;
+  startWeek?: string;
 }
 
 interface FormData {
@@ -76,7 +77,7 @@ const defaultValues = {
 
 const ShiftForm = () => {
   const history = useHistory();
-  const { id } = useParams<PathParams>();
+  const { id, startWeek } = useParams<PathParams>();
 
   const classes = useStyles();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -123,10 +124,16 @@ const ShiftForm = () => {
       const endTime =
         format(new Date(), "yyyy-MM-dd") + " " + currentData.endTime;
 
+
       setValue("name", currentData.name);
       setValue("date", currentData.date);
       setValue("startTime", startTime);
       setValue("endTime", endTime);
+    } else {
+      if (startWeek != null) {
+        const currentDate = format(new Date(startWeek), "yyyy-MM-dd");
+        setValue("date", currentDate);
+      }
     }
   }, [currentData, setValue]);
 

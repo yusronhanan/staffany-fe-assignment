@@ -23,7 +23,7 @@ function App() {
               <Shift />
             </Dashboard>
           </Route>
-          <Route exact path="/shift/add">
+          <Route exact path="/shift/add/:startWeek">
             <Dashboard>
               <ShiftForm />
             </Dashboard>
