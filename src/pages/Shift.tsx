@@ -1,21 +1,19 @@
 import React, { FunctionComponent, useEffect, useState } from "react";
-import Grid from "@material-ui/core/Grid";
-import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
 import { makeStyles } from "@material-ui/core/styles";
 import { getErrorMessage } from "../helper/error/index";
 import { deleteShiftById, getShifts } from "../helper/api/shift";
 import DataTable from "react-data-table-component";
-import IconButton from "@material-ui/core/IconButton";
-import DeleteIcon from "@material-ui/icons/Delete";
-import EditIcon from "@material-ui/icons/Edit";
-import Fab from "@material-ui/core/Fab";
-import AddIcon from "@material-ui/icons/Add";
 import { useHistory } from "react-router-dom";
 import ConfirmDialog from "../components/ConfirmDialog";
 import Alert from "@material-ui/lab/Alert";
 import { Link as RouterLink } from "react-router-dom";
-
+import { Grid, Card, CardContent, IconButton, Fab, Box, } from "@material-ui/core";
+import DeleteIcon from "@material-ui/icons/Delete";
+import EditIcon from "@material-ui/icons/Edit";
+import AddIcon from "@material-ui/icons/Add";
+import Button from "../components/Button";
+import LastPublishedText from "../components/LastPublishedText";
+import SwitchDate from "../components/SwitchDate";
 const useStyles = makeStyles((theme) => ({
   root: {
     minWidth: 275,
@@ -27,6 +25,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: 'white',
     color: theme.color.turquoise
   },
+
 }));
 
 interface ActionButtonProps {
@@ -40,14 +39,21 @@ const ActionButton: FunctionComponent<ActionButtonProps> = ({
   return (
     <div>
       <IconButton
+        disabled={false}
         size="small"
         aria-label="delete"
         component={RouterLink}
-        to={`/shift/${id}/edit`}
+        to={`/shift/${id}/edit`
+        }
       >
         <EditIcon fontSize="small" />
       </IconButton>
-      <IconButton size="small" aria-label="delete" onClick={() => onDelete()}>
+      <IconButton
+        disabled={false}
+        size="small"
+        aria-label="delete"
+        onClick={() => onDelete()
+        }>
         <DeleteIcon fontSize="small" />
       </IconButton>
     </div>
@@ -159,6 +165,27 @@ const Shift = () => {
             ) : (
               <></>
             )}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <SwitchDate currentDateRange={`Jan 10 - Jan 16`} />
+              <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: "center" }}>
+
+                <LastPublishedText
+                  lastPublishDate={`11 Jan 2022, 11:30 AM`}
+                />
+
+                <Button variant="outlined"
+                  to={`/shift/add`}
+                >
+                  ADD SHIFT
+                </Button>
+                <Button
+                  variant="contained"
+                >
+                  PUBLISH
+                </Button>
+              </Box>
+            </Box>
+
             <DataTable
               title="Shifts"
               columns={columns}
